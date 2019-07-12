@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="rest.cars.CarsRouter">
+<Super>%CSP.REST</Super>
+<TimeCreated>65195,36616.948569</TimeCreated>
+
+<Parameter name="UseSession">
+<Type>Integer</Type>
+<Default>1</Default>
+</Parameter>
+
+<XData name="UrlMap">
+<Data><![CDATA[
+<Routes>
+    <Route Url="/" Method="GET" Call="GetList" Cors="true" />
+    <Route Url="/:carId" Method="GET" Call="Get" Cors="true" />
+    <Route Url="/" Method="PUT" Call="Update" Cors="true" />
+    <Route Url="/:carId" Method="DELETE" Call="Delete" Cors="true" />
+    <Route Url="/" Method="POST" Call="Create" Cors="true" />
+</Routes>
+]]></Data>
+</XData>
+
+<Method name="GetList">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#Dim  dynArray As %DynamicArray = []
+    
+    Set objResult = ##class(%XML.DataSet).%New("%DynamicQuery:SQL")	
+    Set sql= "SELECT ID FROM rest_cars.Cars"
+	Do objResult.Prepare(sql)
+	Set status = objResult.Execute()
+	If ($System.Status.IsError(status)){
+		Return status
+	} 
+	While (objResult.Next())
+	{
+		#Dim car As rest.cars.Cars = ##class(rest.cars.Cars).%OpenId(objResult.Data("ID"))
+		Do dynArray.%Push(car.%ToJSON())
+	}
+	
+	Write dynArray.%ToJSON()
+	
+	Return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Get">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id:%Integer</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	
+    #Dim car As rest.cars.Cars = ##class(rest.cars.Cars).%OpenId(id)
+    
+    Write car.%ToJSON().%ToJSON()
+    
+    Return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Update">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #Dim requestCar As %DynamicObject =  {}.%FromJSON(%request.Content)
+    
+    #Dim car As rest.cars.Cars = ##class(rest.cars.Cars).%OpenId(requestCar.ID)
+    
+    Do car.FromJSON(requestCar)
+   	Set status = car.%Save()
+	If ($System.Status.IsError(status)){ Return status } 
+	
+    Write car.%ToJSON().%ToJSON()
+    
+    Return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Create">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #Dim car As rest.cars.Cars = ##class(rest.cars.Cars).%New()
+    #Dim requestCar As %DynamicObject =  {}.%FromJSON(%request.Content)
+
+    Do car.FromJSON(requestCar)
+    Set status = car.%Save()
+    If ($System.Status.IsError(status)){ Return status } 
+    
+    Write car.%ToJSON().%ToJSON()
+    
+    Return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Delete">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id:%Integer</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set status = ##class(rest.cars.Cars).%DeleteId(id)
+	If ($System.Status.IsError(status)){ Return status } 
+	
+	Return $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

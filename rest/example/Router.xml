@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="rest.example.Router">
+<Super>%CSP.REST</Super>
+<TimeCreated>65191,52256.517888</TimeCreated>
+
+<Parameter name="UseSession">
+<Type>Integer</Type>
+<Default>1</Default>
+</Parameter>
+
+<XData name="UrlMap">
+<Data><![CDATA[
+<Routes>
+	<Route Url="/sayhello" Method="GET" Call="SayHello" Cors="true" />
+	<Route Url="/complexobject" Method="GET" Call="ComplexObject" Cors="true" />
+	<Route Url="/userobject" Method="GET" Call="UserObject" Cors="true" />
+	<Route Url="/getlist/:sessionkey" Method="GET" Call="GetListParameters" Cors="true" />
+	<Route Url="/sql" Method="GET" Call="SQL" Cors="true" />
+</Routes>
+]]></Data>
+</XData>
+
+<Method name="SayHello">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#Dim responseObject As %DynamicObject = {}
+	Set responseObject.text = "Hello!"
+
+	Write responseObject.%ToJSON()
+
+	Return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ComplexObject">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	
+	#Dim adress AS dt.Address = ##class(dt.Address).%New()
+	Set adress.Address1 = "Xema"
+	Set adress.Address2 = "Andreu"
+	Set adress.Country = "Manrakesh"
+	
+	//Set x= ##class(co.acb.cTests).GetListConnectV("","","","")
+	Write ##class(fn.JSONHelper).GetJSONString(adress)
+	
+	
+	Return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="UserObject">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#Dim test AS User.tsysParameters = ##class(User.tsysParameters).%OpenId(1)
+	
+	Write ##class(fn.JSONHelper).GetJSONString(test)
+	
+	Return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetListParameters">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>sessionkey:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	TRY {
+		Set %gobjSession = ##class(co.sys.cSessions).CheckSessionOrThrow(sessionkey)		
+	} CATCH {
+		RETURN ..#HTTP401UNAUTHORIZED
+	}
+	
+	//zw %gobjSession
+	#Dim dataSet As %XML.DataSet = ##class(co.sys.cParameters).GetModules()
+	
+	#Dim  dynArray As %DynamicArray =[]
+	
+	While (dataSet.Next()){
+		Do dynArray.%Push({"ModuleID": (dataSet.ModuleId) , "ModuleDesc":(dataSet.ModuleDesc)})
+	}
+	
+	Write dynArray.%ToJSON()
+	
+	Return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="SQL">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set %gobjSession = ##class(co.sys.cSessions).CheckSessionOrThrow("AutomaticProcessDaemonRTCMW030585CONN")
+	#Dim  dynArray As %DynamicArray = []
+    Set objResult = ##class(%XML.DataSet).%New("%DynamicQuery:SQL")	
+    Set sql= "SELECT ID FROM Cars"
+	Do objResult.Prepare(sql)
+	Set status = objResult.Execute()
+	If ($System.Status.IsError(status)){
+		//Error
+		Return status
+	}
+	While (objResult.Next())
+	{
+		Do dynArray.%Push(objResult.Data("ID"))
+	}
+	
+	Write dynArray.%ToJSON()
+	
+	Return $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

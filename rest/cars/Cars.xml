@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="rest.cars.Cars">
+<Super>%Persistent</Super>
+<TimeCreated>65195,36661.986044</TimeCreated>
+
+<Property name="Name">
+<Type>%String</Type>
+</Property>
+
+<Property name="Company">
+<Type>%String</Type>
+</Property>
+
+<Property name="Color">
+<Type>%String</Type>
+</Property>
+
+<Property name="CV">
+<Type>%Integer</Type>
+</Property>
+
+<Method name="%ToJSON">
+<ReturnType>%DynamicObject</ReturnType>
+<Implementation><![CDATA[
+    #Dim json As %DynamicObject = {}
+    Set json.ID = ..%Id()
+    Set json.Name = ..Name
+    Set json.Company = ..Company
+    Set json.Color = ..Color
+    Set json.CV = ..CV
+    return json
+]]></Implementation>
+</Method>
+
+<Method name="FromJSON">
+<FormalSpec>json:%DynamicObject</FormalSpec>
+<Implementation><![CDATA[
+    Set ..Name = json.Name
+    Set ..Company = json.Company
+    Set ..Color = json.Color
+    Set ..CV = json.CV
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^rest.cars.CarsD</DataLocation>
+<DefaultData>CarsDefaultData</DefaultData>
+<IdLocation>^rest.cars.CarsD</IdLocation>
+<IndexLocation>^rest.cars.CarsI</IndexLocation>
+<StreamLocation>^rest.cars.CarsS</StreamLocation>
+<Data name="CarsDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>ID</Value>
+</Value>
+<Value name="3">
+<Value>Name</Value>
+</Value>
+<Value name="4">
+<Value>Company</Value>
+</Value>
+<Value name="5">
+<Value>Color</Value>
+</Value>
+<Value name="6">
+<Value>CV</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

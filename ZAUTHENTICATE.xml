@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Routine name="ZAUTHENTICATE" type="MAC" languagemode="0"><![CDATA[
+ZAUTHENTICATE(ServiceName,Namespace,Username,Password,Credentials,Properties) PUBLIC {
+ /* The line above this containing the ZAUTHENTICATE tag must be 
+ the first line in the file. No include files, documentation or anything else 
+ before this line.*/
+
+	/*
+		2014-11-24 JAC 15554.3 [PBI]: New
+		2014-11-25 JAC 15554.3 [PBI]: GetCredentials
+		2014-11-25 Updated JAC 15554.1.3 [PBI]: GetCredentials
+		2016-01-31 canizarj 99423 GetCredentials
+		2018-05-17 canizarj 86915 [PBI] GetCredentials
+	*/
+
+ /*
+ This function is called when delegated authentication is selected for
+ user authentication. If the end-user wishes to implement their own 
+ authentication module, they need to modify this code and implement
+ their own authentication method here. The authentication method can be 
+ any user written COS code, class method, or $zf callout.
+ */
+ 
+ //Make sure we have an error trap to handle unexpected errors
+ s $ZT="Error"
+ //Add username/password validation here. The following is some pseudocode
+ //of what you might want to do.
+ s $ZE="No ZAUTHENTICATE routine found" g Error
+ q $SYSTEM.Status.OK()
+ 
+ 
+Error //Handle any COS errors here
+ //Reset error trap to avoid infinite loop
+ s $zt=""
+ //Return the generalized COS error message #5002
+ q $SYSTEM.Status.Error(5002 /*$$$CacheError*/,$ze)
+ }
+ 
+ 
+ChangePassword(Username,NewPassword,OldPassword,Status) Public {
+ s $zt="Error"
+ s Status=$SYSTEM.Status.Error(5002 /*$$$CacheError*/,"No ZAUTHENTICATE routine found")
+ q 0
+ 
+ 
+Error //Handle any COS errors here
+ //Reset error trap to avoid infinite loop
+ s $zt=""
+ //Return the generalized COS error message #5002
+ s Status=$SYSTEM.Status.Error(5002 /*$$$CacheError*/,$ze)
+ //Return failure
+ q 0
+} 
+
+GetCredentials(ServiceName,Namespace,Username,Password,Credentials) Public {
+
+	/*
+		2014-11-25 JAC 15554.3 [PBI]
+		2014-11-25 Updated JAC 15554.1.3 [PBI]: Code review
+		2016-01-31 canizarj 99423
+		2018-05-17 canizarj 86915 [PBI]
+	*/
+ s $zt="Error"
+ // The following example sets the processes Username/Password without prompting them
+ // to _SYSTEM/SYS if a console,and Admin/SYS if a telnet user.
+  If $isobject($get(%request))
+  { 
+  
+	//S WebAddOn=$F($System.License.KeyLicenseCapacity(),"Web Add-On")
+	//If (WebAddOn > 0){ quit $System.Status.Error($$$GetCredentialsFailed)}
+  
+ 	If (%request.Application="/csp/conn/rest/")
+ 	{
+		Set strClass ="rest.Router"
+		Set strMethod ="AuthenticateCSP"
+ 	}
+ 	
+ 	If ($Get(Username,"") = ""){
+	 	s strPreviousNS = $NAMESPACE
+	 	S $NAMESPACE = "CONN"
+ 		d $CLASSMETHOD(strClass,strMethod,.Username,.Password)
+	 	s $NAMESPACE = strPreviousNS
+ 	}
+ 	If ($Get(Username,"") '= ""){ quit $System.Status.OK()}
+ 	
+
+ }
+ // For any other service, deny them access
+ ;q $SYSTEM.Status.Error($$$AccessDenied)
+ // By default, we allow the system to do its normal Username/Password prompting.
+ q $SYSTEM.Status.Error(1419 /*$$$GetCredentialsFailed*/)
+ 
+ 
+Error //Handle any COS errors here
+ //Reset error trap to avoid infinite loop
+ s $zt=""
+ //Return the generalized COS error message #5002
+ q $SYSTEM.Status.Error(5002 /*$$$CacheError*/,$ze)
+}
+
+
+]]></Routine>
+</Export>

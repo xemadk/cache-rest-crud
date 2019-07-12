@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="rest.Router">
+<Description><![CDATA[
+Main Router for all the REST APIs
+In this class should only exist <Map/> deifinitions to other Routers]]></Description>
+<Super>%CSP.REST</Super>
+<TimeCreated>64141,55737.104393</TimeCreated>
+
+<Parameter name="UseSession">
+<Type>Integer</Type>
+<Default>1</Default>
+</Parameter>
+
+<XData name="UrlMap">
+<Data><![CDATA[
+<Routes>
+<!-- <Map Prefix="/core/test" Forward="rest.core.Router" /> -->
+<!-- <Route Url="/test" Method="GET" RedirectClass="wfe.interface.ui.RouteHistory" RedirectMethod="GetList" /> -->
+<Map Prefix="/example" Forward="rest.example.Router"/>
+<Map Prefix="/cars" Forward="rest.cars.CarsRouter"/>
+</Routes>
+]]></Data>
+</XData>
+
+<Method name="AuthenticateCSP">
+<Description><![CDATA[
+<pre>
+***************************************************************************
+* Function: AuthenticateCSP
+* Description: Return an available user to authenticate the session
+* Param.  : strUserName	-> User name that will be used. Output parameter
+* 			strUserPass	-> User password to authenticate strUserName. Output parameter
+***************************************************************************
+</pre>]]></Description>
+<Internal>1</Internal>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>*strUserName,*strUserPass</FormalSpec>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	;REST connections should use ROCHEWS users
+	
+	set strUserName = "ROCHEWS"
+	set strUserPass = ##class(co.ins.cinsGeneral).GetPassword(strUserName)
+]]></Implementation>
+</Method>
+</Class>
+</Export>
