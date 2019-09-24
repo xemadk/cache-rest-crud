@@ -2,7 +2,8 @@
 
 ## Configuration Steps
 * Creat Web Application
-	- Name = Ruta base del servicio '/csp/conn/rest'
+    - Name = Ruta base del servicio '/csp/conn/rest'
+    - Select Namespace 'CONN'
     - Enabled: Application, CSP/ZEN, Inbound Web Service
     - Security; Unauthenticated, Password, Delegated
     - Dispatch: rest.Router
